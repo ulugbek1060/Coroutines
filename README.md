@@ -40,7 +40,7 @@ In this code, we create a coroutine using `GlobalScope.launch` and specify the `
 
 After the task is complete, we use `withContext` to switch to the `Dispatchers.Main` dispatcher and update the UI with the result using the `updateUI` function.
 
-# Jobs
+# Job
 
 In Kotlin Coroutines, a `Job` is a handle to a coroutine that can be used to control its lifecycle and cancel it if necessary. A `Job` is created whenever a coroutine is launched using the `launch`, `async`, or `runBlocking` functions.
 
@@ -69,4 +69,55 @@ fun main() {
 In this code, we create a new coroutine using `GlobalScope.launch` and store its associated job in the `job` variable. We then do some other work outside of the coroutine before cancelling it using the `cancel()` function.
 
 Note that cancelling a coroutine does not guarantee that it will stop immediately, as it may need time to clean up any resources it was using. You can use the optional parameter of the `cancel()` function to specify whether you want to cancel the coroutine immediately or wait for it to finish its current work.
+
+# SupervisorJob
+
+In Kotlin Coroutines, a `SupervisorJob` is a type of `Job` that is used to manage a group of child coroutines. When a coroutine with a `SupervisorJob` fails, only the failed coroutine and its children are cancelled, while the other coroutines in the group continue to run.
+
+Here's an example of how to use a `SupervisorJob`:
+
+```kotlin
+import kotlinx.coroutines.*
+
+fun main() = runBlocking {
+    val supervisor = SupervisorJob()
+    val scope = CoroutineScope(coroutineContext + supervisor)
+
+    scope.launch {
+        println("Coroutine 1 started")
+        delay(1000)
+        throw RuntimeException("Coroutine 1 failed")
+    }
+
+    scope.launch {
+        println("Coroutine 2 started")
+        delay(2000)
+        println("Coroutine 2 completed")
+    }
+
+    delay(3000)
+}
+```
+
+In this code, we create a new `SupervisorJob` using the `SupervisorJob()` constructor and add it to the coroutine context of a new `CoroutineScope`. We then launch two child coroutines using the `launch` function on the scope.
+
+The first coroutine throws an exception after delaying for 1 second, simulating a failure. The second coroutine delays for 2 seconds before completing successfully.
+
+When we run this code using `runBlocking`, we see that only the first coroutine is cancelled due to its failure, while the second coroutine continues to run:
+
+```java
+Coroutine 1 started
+Coroutine 2 started
+Exception in thread "main" java.lang.RuntimeException: Coroutine 1 failed
+	at MainKt$main$1$1.invokeSuspend(main.kt:10)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:106)
+	at kotlinx.coroutines.EventLoop.processUnconfinedEvent(EventLoop.kt:136)
+	at kotlinx.coroutines.internal.DispatchedContinuationKt.resumeCancellableWith(DispatchedContinuation.kt:305)
+	at kotlinx.coroutines.intrinsics.CancellableKt.startCoroutineCancellable(Cancellable.kt:30)
+	at kotlinx.coroutines.CoroutineStart.invoke(CoroutineStart.kt:110)
+	at kotlinx.coroutines.AbstractCoroutine.start(AbstractCoroutine.kt:158)
+	at kotlinx.coroutines.BuildersKt__Builders_commonKt.launch(Builders.common.kt:56)
+	at kotlinx.coroutines.BuildersKt.launch(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__Builders_commonKt.launch$
 
