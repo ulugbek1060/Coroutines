@@ -11,7 +11,7 @@ Here are some key concepts of Kotlin Coroutines:
 
 Here's an example of how to use Kotlin Coroutines to perform a long-running task on a background thread:
 
-```
+```kotlin
 import kotlinx.coroutines.*
 
 fun main() {
