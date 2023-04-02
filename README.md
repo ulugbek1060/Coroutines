@@ -40,6 +40,53 @@ In this code, we create a coroutine using `GlobalScope.launch` and specify the `
 
 After the task is complete, we use `withContext` to switch to the `Dispatchers.Main` dispatcher and update the UI with the result using the `updateUI` function.
 
+In Kotlin Coroutines, a `CoroutineScope` is an object that provides a structured way to launch and manage coroutines. A `CoroutineScope` is typically created for a specific task or component of an application, and it can be used to launch child coroutines that are tied to its lifecycle.
+
+Here are some key concepts related to coroutine scopes:
+
+1. Coroutine Context: A set of rules that define how coroutines should behave, such as which dispatcher to use for running code on a specific thread. The context of a coroutine scope is used as the default context for all coroutines launched within it.
+
+2. Parent-child relationships: When you launch a coroutine from within a `CoroutineScope`, the new coroutine becomes a child of the parent coroutine. This means that if the parent coroutine is cancelled or fails, all of its children will also be cancelled.
+
+3. Structured concurrency: By using `CoroutineScope` objects to manage coroutines, you can ensure that all coroutines are properly cancelled when they are no longer needed. This helps prevent memory leaks and other issues that can arise from long-running or uncontrolled coroutines.
+
+Here's an example of how to create and use a `CoroutineScope`:
+
+```kotlin
+import kotlinx.coroutines.*
+
+fun main() = runBlocking {
+    val scope = CoroutineScope(Dispatchers.Default)
+
+    scope.launch {
+        println("Coroutine 1 started")
+        delay(1000)
+        println("Coroutine 1 completed")
+    }
+
+    scope.launch {
+        println("Coroutine 2 started")
+        delay(2000)
+        println("Coroutine 2 completed")
+    }
+
+    delay(3000)
+}
+```
+
+In this code, we create a new `CoroutineScope` using the `CoroutineScope()` constructor and specify the `Dispatchers.Default` dispatcher as its context. We then launch two child coroutines using the `launch` function on the scope.
+
+The first coroutine delays for 1 second before completing, while the second coroutine delays for 2 seconds before completing. We use `delay` to pause the main thread for 3 seconds to allow both coroutines to finish.
+
+When we run this code using `runBlocking`, we see that both coroutines complete successfully:
+
+```
+Coroutine 1 started
+Coroutine 2 started
+Coroutine 1 completed
+Coroutine 2 completed
+```
+
 # Job
 
 In Kotlin Coroutines, a `Job` is a handle to a coroutine that can be used to control its lifecycle and cancel it if necessary. A `Job` is created whenever a coroutine is launched using the `launch`, `async`, or `runBlocking` functions.
@@ -105,7 +152,7 @@ The first coroutine throws an exception after delaying for 1 second, simulating 
 
 When we run this code using `runBlocking`, we see that only the first coroutine is cancelled due to its failure, while the second coroutine continues to run:
 
-```java
+```
 Coroutine 1 started
 Coroutine 2 started
 Exception in thread "main" java.lang.RuntimeException: Coroutine 1 failed
