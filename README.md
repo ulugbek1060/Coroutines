@@ -39,3 +39,34 @@ fun updateUI(result: String) {
 In this code, we create a coroutine using `GlobalScope.launch` and specify the `Dispatchers.IO` dispatcher to run the coroutine on a background thread. We then call `doLongRunningTask`, which is a suspending function that simulates a long-running task by delaying for 5 seconds.
 
 After the task is complete, we use `withContext` to switch to the `Dispatchers.Main` dispatcher and update the UI with the result using the `updateUI` function.
+
+# Jobs
+
+In Kotlin Coroutines, a `Job` is a handle to a coroutine that can be used to control its lifecycle and cancel it if necessary. A `Job` is created whenever a coroutine is launched using the `launch`, `async`, or `runBlocking` functions.
+
+Here are some common use cases for working with `Job`s in Kotlin Coroutines:
+
+1. Cancelling a coroutine: You can cancel a running coroutine by calling the `cancel()` function on its associated `Job`. This will cause the coroutine to stop executing and any resources it was using to be released.
+
+2. Waiting for multiple coroutines to complete: You can use the `CoroutineScope.launch` function to launch multiple coroutines and obtain a reference to their associated jobs. You can then use the `joinAll()` function to wait for all of the coroutines to complete before continuing execution.
+
+3. Handling errors: You can use the `try-catch` block inside a coroutine to handle errors that occur during its execution. If an exception is thrown, the coroutine will be cancelled and any parent coroutines will also be cancelled.
+
+Here's an example of how to launch a coroutine and obtain its associated job:
+
+```kotlin
+import kotlinx.coroutines.*
+
+fun main() {
+    val job = GlobalScope.launch {
+        // Coroutine code here
+    }
+    // Do other work here
+    job.cancel() // Cancel the coroutine
+}
+```
+
+In this code, we create a new coroutine using `GlobalScope.launch` and store its associated job in the `job` variable. We then do some other work outside of the coroutine before cancelling it using the `cancel()` function.
+
+Note that cancelling a coroutine does not guarantee that it will stop immediately, as it may need time to clean up any resources it was using. You can use the optional parameter of the `cancel()` function to specify whether you want to cancel the coroutine immediately or wait for it to finish its current work.
+
