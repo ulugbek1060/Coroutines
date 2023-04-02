@@ -145,6 +145,19 @@ fun main() = runBlocking {
     delay(3000)
 }
 ```
+```kotlin
+protected val viewModelScope: CoroutineScope by lazy {
+      val errorHandler = CoroutineExceptionHandler { _, exception ->
+         Core.errorHandler.handleError(exception)
+      }
+      CoroutineScope(SupervisorJob() + Dispatchers.Main + errorHandler)
+   }
+
+   override fun onCleared() {
+      super.onCleared()
+      viewModelScope.cancel()
+   }
+```
 
 In this code, we create a new `SupervisorJob` using the `SupervisorJob()` constructor and add it to the coroutine context of a new `CoroutineScope`. We then launch two child coroutines using the `launch` function on the scope.
 
@@ -167,4 +180,8 @@ Exception in thread "main" java.lang.RuntimeException: Coroutine 1 failed
 	at kotlinx.coroutines.BuildersKt__Builders_commonKt.launch(Builders.common.kt:56)
 	at kotlinx.coroutines.BuildersKt.launch(Unknown Source)
 	at kotlinx.coroutines.BuildersKt__Builders_commonKt.launch$
+	
+	
+
+
 
